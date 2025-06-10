@@ -1,0 +1,45 @@
+.example-viewport {
+  height: 200px;
+  width: 200px;
+}
+
+.example-item {
+  height: 50px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+}
+
+.example-item:hover {
+  background-color: rgb(235, 235, 235);
+}
+
+.w-full {
+  width: 100%;
+}
+
+ .overlay-container {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+
+  border-radius: 4px;
+  box-shadow: 0 1px 1px -1px rgba(0, 0, 0, 0.1), 0 4px 5px 0 rgba(0, 0, 0, 0.14),
+    0 1px 5px 0 rgba(0, 0, 0, 0.12);
+}
+
+.search-form-field {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  background: #898989;
+  width: 100%;
+
+  input {
+    flex: 1;
+    background: red;
+    line-height: 50px;
+  }
+}

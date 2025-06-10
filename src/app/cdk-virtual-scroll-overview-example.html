@@ -1,0 +1,73 @@
+<div #inputSelect>
+  <mat-form-field
+    class="example-form-field w-full"
+    appearance="outline"
+    cdkOverlayOrigin
+    #trigger="cdkOverlayOrigin"
+    (click)="alterarExibicaoOpcoes()"
+  >
+    <mat-label>Selecione</mat-label>
+
+    <input matInput type="text" placeholder="Selecione" readonly />
+
+    <mat-icon matSuffix> arrow_drop_down </mat-icon>
+
+    <mat-hint align="end">{{selected.size}} / {{items?.length}}</mat-hint>
+  </mat-form-field>
+</div>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="trigger"
+  [cdkConnectedOverlayOpen]="exibirOverlayOpcoes"
+  [cdkConnectedOverlayWidth]="inputSelect.offsetWidth"
+  [cdkConnectedOverlayHasBackdrop]="true"
+  [cdkConnectedOverlayBackdropClass]="'overlay-transparent'"
+  [cdkConnectedOverlayPanelClass]="'overlay-container'"
+  [cdkConnectedOverlayOffsetY]="-25"
+  (backdropClick)="fecharOverlay()"
+  (overlayKeydown)="onOverlayKeydown($event)"
+>
+  <div class="search-form-field search-input">
+    <mat-checkbox
+      style="margin-right: 8px"
+      disabled
+      (click)="changeAll()"
+      [checked]="completed"
+      [indeterminate]="indeterminated"
+    ></mat-checkbox>
+
+    <input
+      matInput
+      type="text"
+      [(ngModel)]="filterValue"
+      (keyup)="applyFilter()"
+      placeholder="Buscar"
+    />
+    <button
+      mat-button
+      *ngIf="filterValue"
+      mat-icon-button
+      aria-label="Clear"
+      (click)="clearFilter()"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <cdk-virtual-scroll-viewport itemSize="50" class="example-viewport w-full">
+    <div
+      *cdkVirtualFor="let item of filteredList"
+      class="example-item"
+      (click)="changeSelected(item.id); $event.stopPropagation()"
+    >
+      <mat-checkbox
+        class="example-margin"
+        disabled
+        [checked]="selected.has(item.id)"
+      >
+      </mat-checkbox>
+      {{item.name}}
+    </div>
+  </cdk-virtual-scroll-viewport>
+</ng-template>
