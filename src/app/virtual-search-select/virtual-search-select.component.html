@@ -7,18 +7,21 @@
   (keydown)="onSelectKeydown($event)"
 >
   <mat-form-field [style.width.%]="100" appearance="outline">
-    <mat-label>Selecione</mat-label>
+    <mat-label>{{ titulo }}</mat-label>
 
     <input
       matInput
       type="text"
+      [value]="selectedArray"
       (focus)="onTouched && onTouched()"
       [disabled]="isDisabled"
     />
 
     <mat-icon matSuffix> arrow_drop_down </mat-icon>
 
-    <mat-hint align="end">{{ selected.size }} / {{ items.length }}</mat-hint>
+    <mat-hint align="end" *ngIf="exibirQuantidade"
+      >{{ selected.size }} / {{ items.length }}</mat-hint
+    >
   </mat-form-field>
 </div>
 

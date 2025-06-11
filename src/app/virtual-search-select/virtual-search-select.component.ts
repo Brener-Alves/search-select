@@ -2,12 +2,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  Input,
   OnInit,
   Optional,
   ViewChild,
   ViewEncapsulation,
-} from "@angular/core";
-import { ControlValueAccessor, NgControl } from "@angular/forms";
+} from '@angular/core';
+import { ControlValueAccessor, NgControl } from '@angular/forms';
 
 @Component({
   selector: "virtual-search-select",
@@ -20,6 +21,10 @@ export class VirtualSearchSelectComponent
   implements OnInit, ControlValueAccessor
 {
   @ViewChild("searchInput") searchInput!: ElementRef<HTMLInputElement>;
+
+  @Input() titulo: string;
+  @Input() iniciarTodosMarcados: boolean = true;
+  @Input() exibirQuantidade: boolean = true;
 
   items = Array.from({ length: 100000 })
     .map((_, i) => {
@@ -36,6 +41,7 @@ export class VirtualSearchSelectComponent
   completed = false;
   indeterminated = false;
   exibirOverlayOpcoes = false;
+  selectedArray = Array.from(this.selected);
 
   constructor(@Optional() public ngControl: NgControl) {
     if (this.ngControl) {
@@ -45,6 +51,8 @@ export class VirtualSearchSelectComponent
 
   ngOnInit(): void {
     this.applyFilter();
+
+    if (this.iniciarTodosMarcados) this.changeAll();
   }
 
   applyFilter() {
@@ -61,8 +69,9 @@ export class VirtualSearchSelectComponent
 
   changeSelected(id: number) {
     this.selected.has(id) ? this.selected.delete(id) : this.selected.add(id);
+    this.selectedArray = Array.from(this.selected);
     this.updateStatusCheckAll();
-    this.onChange && this.onChange(Array.from(this.selected));
+    this.onChange && this.onChange(this.selectedArray);
   }
 
   changeAll() {
@@ -71,8 +80,9 @@ export class VirtualSearchSelectComponent
         ? this.selected.delete(item.id)
         : this.selected.add(item.id);
     });
+    this.selectedArray = Array.from(this.selected);
     this.updateStatusCheckAll();
-    this.onChange && this.onChange(Array.from(this.selected));
+    this.onChange && this.onChange(this.selectedArray);
   }
 
   updateStatusCheckAll() {
@@ -123,6 +133,7 @@ export class VirtualSearchSelectComponent
 
   writeValue(obj: number[]): void {
     this.selected = new Set(obj);
+    this.selectedArray = Array.from(this.selected);
   }
 
   registerOnChange(fn: any): void {
