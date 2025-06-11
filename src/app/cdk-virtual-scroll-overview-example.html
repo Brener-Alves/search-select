@@ -36,7 +36,7 @@
       (keydown.space)="$event.preventDefault();changeAll()"
       [checked]="completed"
       [indeterminate]="indeterminated"
-      [style.padding-left.px]="12"
+      [style.margin-left.px]="12"
     ></mat-checkbox>
 
     <input
@@ -54,6 +54,7 @@
       mat-icon-button
       aria-label="Clear"
       (click)="clearFilter()"
+      [style.margin-right.px]="8"
     >
       <mat-icon>close</mat-icon>
     </button>

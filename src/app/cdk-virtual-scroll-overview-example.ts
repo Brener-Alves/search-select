@@ -18,12 +18,14 @@ import {
 export class CdkVirtualScrollOverviewExample implements OnInit {
   @ViewChild("searchInput") searchInput!: ElementRef<HTMLInputElement>;
 
-  items = Array.from({ length: 100000 }).map((_, i) => {
-    return {
-      id: i + 1,
-      name: `Item #${i + 1}`,
-    };
-  });
+  items = Array.from({ length: 100000 })
+    .map((_, i) => {
+      return {
+        id: i + 1,
+        name: `Item #${i + 1}`,
+      };
+    })
+    .sort((a, b) => Intl.Collator().compare(a.name, b.name));
 
   filteredList = this.items.slice();
   filterValue = "";
