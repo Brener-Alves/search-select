@@ -1,28 +1,32 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   OnInit,
+  ViewChild,
   ViewEncapsulation,
-} from '@angular/core';
+} from "@angular/core";
 
 /** @title Basic virtual scroll */
 @Component({
-  selector: 'cdk-virtual-scroll-overview-example',
-  styleUrls: ['cdk-virtual-scroll-overview-example.scss'],
-  templateUrl: 'cdk-virtual-scroll-overview-example.html',
+  selector: "cdk-virtual-scroll-overview-example",
+  styleUrls: ["cdk-virtual-scroll-overview-example.scss"],
+  templateUrl: "cdk-virtual-scroll-overview-example.html",
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
 })
 export class CdkVirtualScrollOverviewExample implements OnInit {
+  @ViewChild("searchInput") searchInput!: ElementRef<HTMLInputElement>;
+
   items = Array.from({ length: 100000 }).map((_, i) => {
     return {
-      id: i,
-      name: `Item #${i}`,
+      id: i + 1,
+      name: `Item #${i + 1}`,
     };
   });
 
   filteredList = this.items.slice();
-  filterValue = '';
+  filterValue = "";
   selected = new Set<number>();
   completed = false;
   indeterminated = false;
@@ -40,7 +44,7 @@ export class CdkVirtualScrollOverviewExample implements OnInit {
   }
 
   clearFilter() {
-    this.filterValue = '';
+    this.filterValue = "";
     this.applyFilter();
   }
 
@@ -71,13 +75,31 @@ export class CdkVirtualScrollOverviewExample implements OnInit {
 
   alterarExibicaoOpcoes(): void {
     this.exibirOverlayOpcoes = !this.exibirOverlayOpcoes;
+
+    if (this.exibirOverlayOpcoes) {
+      setTimeout(() => {
+        this.searchInput?.nativeElement.focus();
+      });
+    }
   }
 
   fecharOverlay(): void {
     this.exibirOverlayOpcoes = false;
+    this.filterValue = "";
+    this.applyFilter();
   }
 
   onOverlayKeydown(event: KeyboardEvent) {
-    if (event.key === 'Escape') this.fecharOverlay();
+    if (["Escape"].includes(event.key)) this.fecharOverlay();
+  }
+
+  onSelectKeydown(event: KeyboardEvent): void {
+    if (!["Tab"].includes(event.key)) {
+      event.preventDefault();
+    }
+
+    if (["Enter", " "].includes(event.key)) {
+      this.alterarExibicaoOpcoes();
+    }
   }
 }

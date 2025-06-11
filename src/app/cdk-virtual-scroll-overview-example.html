@@ -1,18 +1,19 @@
-<div #inputSelect>
-  <mat-form-field
-    class="example-form-field w-full"
-    appearance="outline"
-    cdkOverlayOrigin
-    #trigger="cdkOverlayOrigin"
-    (click)="alterarExibicaoOpcoes()"
-  >
+<div
+  #inputSelect
+  class="input-select"
+  cdkOverlayOrigin
+  #trigger="cdkOverlayOrigin"
+  (click)="alterarExibicaoOpcoes()"
+  (keydown)="onSelectKeydown($event)"
+>
+  <mat-form-field [style.width.%]="100" appearance="outline">
     <mat-label>Selecione</mat-label>
 
-    <input matInput type="text" placeholder="Selecione" readonly />
+    <input matInput type="text" />
 
     <mat-icon matSuffix> arrow_drop_down </mat-icon>
 
-    <mat-hint align="end">{{selected.size}} / {{items?.length}}</mat-hint>
+    <mat-hint align="end">{{selected.size}} / {{items.length}}</mat-hint>
   </mat-form-field>
 </div>
 
@@ -28,23 +29,26 @@
   (backdropClick)="fecharOverlay()"
   (overlayKeydown)="onOverlayKeydown($event)"
 >
-  <div class="search-form-field search-input">
+  <div class="search-form-field">
     <mat-checkbox
-      style="margin-right: 8px"
-      disabled
-      (click)="changeAll()"
+      (click)="$event.preventDefault();changeAll()"
+      (keydown.enter)="$event.preventDefault();changeAll()"
+      (keydown.space)="$event.preventDefault();changeAll()"
       [checked]="completed"
       [indeterminate]="indeterminated"
+      [style.padding-left.px]="12"
     ></mat-checkbox>
 
     <input
+      #searchInput
       matInput
-      type="text"
+      type="search"
       [(ngModel)]="filterValue"
       (keyup)="applyFilter()"
-      placeholder="Buscar"
+      placeholder="Pesquisar"
     />
     <button
+      type="button"
       mat-button
       *ngIf="filterValue"
       mat-icon-button
@@ -55,19 +59,32 @@
     </button>
   </div>
 
-  <cdk-virtual-scroll-viewport itemSize="50" class="example-viewport w-full">
+  <cdk-virtual-scroll-viewport
+    itemSize="50"
+    class="example-viewport"
+    [style.height.px]="filteredList.length * 50"
+  >
     <div
       *cdkVirtualFor="let item of filteredList"
       class="example-item"
-      (click)="changeSelected(item.id); $event.stopPropagation()"
+      matRipple
+      [style.max-width.px]="inputSelect.offsetWidth"
+      [style.background]="selected.has(item.id) ? '#f5f5f5' : 'transparent'"
+      (click)="changeSelected(item.id)"
+      (keydown.enter)="changeSelected(item.id)"
+      (keydown.space)="changeSelected(item.id)"
     >
       <mat-checkbox
-        class="example-margin"
-        disabled
         [checked]="selected.has(item.id)"
+        (click)="$event.preventDefault()"
+        (keydown.enter)="$event.preventDefault()"
+        (keydown.space)="$event.preventDefault()"
       >
       </mat-checkbox>
-      {{item.name}}
+      <span class="label"> {{item.name}} </span>
     </div>
+    <p *ngIf="!filteredList.length" [style.margin-left.px]="12">
+      Nenhum resultado encontrado.
+    </p>
   </cdk-virtual-scroll-viewport>
 </ng-template>
