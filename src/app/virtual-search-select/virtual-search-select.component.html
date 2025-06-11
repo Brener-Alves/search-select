@@ -3,8 +3,8 @@
   class="input-select"
   cdkOverlayOrigin
   #trigger="cdkOverlayOrigin"
-  (click)="alterarExibicaoOpcoes()"
-  (keydown)="onSelectKeydown($event)"
+  (click)="!isDisabled && alterarExibicaoOpcoes()"
+  (keydown)="!isDisabled && onSelectKeydown($event)"
 >
   <mat-form-field [style.width.%]="100" appearance="outline">
     <mat-label>{{ titulo }}</mat-label>
@@ -12,7 +12,7 @@
     <input
       matInput
       type="text"
-      [value]="selectedArray"
+      [(ngModel)]="selectedArray"
       (focus)="onTouched && onTouched()"
       [disabled]="isDisabled"
     />

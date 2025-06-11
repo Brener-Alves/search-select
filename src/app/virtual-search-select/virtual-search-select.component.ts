@@ -1,5 +1,7 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   Input,
@@ -18,7 +20,7 @@ import { ControlValueAccessor, NgControl } from '@angular/forms';
   encapsulation: ViewEncapsulation.None,
 })
 export class VirtualSearchSelectComponent
-  implements OnInit, ControlValueAccessor
+  implements OnInit, AfterViewInit, ControlValueAccessor
 {
   @ViewChild("searchInput") searchInput!: ElementRef<HTMLInputElement>;
 
@@ -43,7 +45,10 @@ export class VirtualSearchSelectComponent
   exibirOverlayOpcoes = false;
   selectedArray = Array.from(this.selected);
 
-  constructor(@Optional() public ngControl: NgControl) {
+  constructor(
+    @Optional() public ngControl: NgControl,
+    private changeDetector: ChangeDetectorRef
+  ) {
     if (this.ngControl) {
       this.ngControl.valueAccessor = this;
     }
@@ -55,10 +60,19 @@ export class VirtualSearchSelectComponent
     if (this.iniciarTodosMarcados) this.changeAll();
   }
 
+  ngAfterViewInit(): void {
+    this.changeDetector.detectChanges();
+  }
+
   applyFilter() {
-    this.filteredList = this.items.filter((item) =>
-      item.name.includes(this.filterValue)
-    );
+    if (!this.filterValue) {
+      this.filteredList = this.items.slice();
+    } else {
+      this.filteredList = this.items.filter((item) =>
+        item.name.includes(this.filterValue)
+      );
+    }
+
     this.updateStatusCheckAll();
   }
 
@@ -134,17 +148,22 @@ export class VirtualSearchSelectComponent
   writeValue(obj: number[]): void {
     this.selected = new Set(obj);
     this.selectedArray = Array.from(this.selected);
+    this.updateStatusCheckAll();
+    this.changeDetector.detectChanges();
   }
 
   registerOnChange(fn: any): void {
     this.onChange = fn;
+    this.changeDetector.detectChanges();
   }
 
   registerOnTouched(fn: any): void {
     this.onTouched = fn;
+    this.changeDetector.detectChanges();
   }
 
   setDisabledState?(isDisabled: boolean): void {
     this.isDisabled = isDisabled;
+    this.changeDetector.detectChanges();
   }
 }

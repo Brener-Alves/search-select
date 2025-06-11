@@ -1,5 +1,28 @@
-<virtual-search-select
-  titulo="Teste"
-  [iniciarTodosMarcados]="false"
-  [exibirQuantidade]="true"
-></virtual-search-select>
+<div [formGroup]="form">
+  <virtual-search-select
+    titulo="Teste"
+    [iniciarTodosMarcados]="false"
+    [exibirQuantidade]="true"
+    formControlName="teste"
+  ></virtual-search-select>
+
+  <span style="display: block"
+    >Valor no form: {{form.get('teste')?.value}}</span
+  >
+
+  <button type="button" (click)="setarValorNoForm()">teste form</button>
+  <button type="button" (click)="printForm()">print</button>
+</div>
+
+<div [formGroup]="form">
+  <virtual-search-select
+    titulo="Teste"
+    [iniciarTodosMarcados]="false"
+    [exibirQuantidade]="true"
+    formControlName="teste2"
+  ></virtual-search-select>
+
+  <span style="display: block"
+    >Valor no form: {{form.get('teste2')?.value}}</span
+  >
+</div>
