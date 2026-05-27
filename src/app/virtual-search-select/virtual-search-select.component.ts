@@ -24,20 +24,13 @@ export class VirtualSearchSelectComponent
 {
   @ViewChild("searchInput") searchInput!: ElementRef<HTMLInputElement>;
 
+  @Input() lista: any[] = [];
   @Input() titulo: string = "Selecione";
   @Input() iniciarTodosMarcados: boolean = true;
   @Input() exibirQuantidade: boolean = true;
+  @Input() ordenar: boolean = true;
 
-  items = Array.from({ length: 100000 })
-    .map((_, i) => {
-      return {
-        id: i + 1,
-        name: `Item #${i + 1}`,
-      };
-    })
-    .sort((a, b) => Intl.Collator().compare(a.name, b.name));
-
-  filteredList = this.items.slice();
+  filteredList = this.lista.slice();
   filterValue = "";
   selected = new Set<number>();
   completed = false;
@@ -55,6 +48,10 @@ export class VirtualSearchSelectComponent
   }
 
   ngOnInit(): void {
+    if (this.ordenar) {
+      this.lista.sort((a, b) => Intl.Collator().compare(a.name, b.name));
+    }
+
     this.applyFilter();
 
     if (this.iniciarTodosMarcados) this.changeAll();
@@ -66,9 +63,9 @@ export class VirtualSearchSelectComponent
 
   applyFilter() {
     if (!this.filterValue) {
-      this.filteredList = this.items.slice();
+      this.filteredList = this.lista.slice();
     } else {
-      this.filteredList = this.items.filter((item) =>
+      this.filteredList = this.lista.filter((item) =>
         item.name.includes(this.filterValue),
       );
     }

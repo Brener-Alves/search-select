@@ -18,17 +18,14 @@ export class CdkVirtualScrollOverviewExample {
     teste: [null, [Validators.required]],
   });
 
-  testeModel = [1, 7, 990];
+  lista = Array.from({ length: 100000 }).map((_, i) => {
+    return {
+      id: i + 1,
+      name: `Item #${i + 1}`,
+    };
+  });
 
   constructor(protected fb: FormBuilder) {}
-
-  setarValorNoForm() {
-    this.form.get("teste")?.setValue([1, 2, 3]);
-  }
-
-  setarValorNoModel() {
-    this.testeModel = [88, 5];
-  }
 
   printForm() {
     console.log(this.form);

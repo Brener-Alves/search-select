@@ -1,15 +1,14 @@
 <div class="acoes">
-  <button type="button" (click)="setarValorNoForm()">
-    Alterar valor no control pelo TS
-  </button>
   <button type="button" (click)="printForm()">print form</button>
 </div>
 
 <form [formGroup]="form">
   <virtual-search-select
     titulo="Teste"
+    [lista]="lista"
     [iniciarTodosMarcados]="true"
     [exibirQuantidade]="true"
+    [ordenar]="false"
     formControlName="teste"
   ></virtual-search-select>
 </form>
