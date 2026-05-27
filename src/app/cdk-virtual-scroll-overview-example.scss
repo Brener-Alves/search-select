@@ -4,3 +4,9 @@
   gap: 8px;
   margin-bottom: 2rem;
 }
+
+.container-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}

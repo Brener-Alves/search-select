@@ -1,37 +1,115 @@
-.example-item {
-  height: 50px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 12px;
-  cursor: pointer;
+// ─── Trigger / campo de exibição ──────────────────────────────────────────────
 
-  &:hover {
-    background-color: #f5f5f5;
+.input-select {
+  display: block;
+  cursor: pointer;
+  outline: none;
+
+  &--disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    pointer-events: none;
   }
 
-  .label {
-    white-space: nowrap;
-    overflow: hidden;
+  // Impede que o cursor de texto apareça no input readonly
+  .mat-mdc-input-element {
+    caret-color: transparent !important;
+    cursor: pointer !important;
     text-overflow: ellipsis;
+    user-select: none;
+  }
+
+  // Ícone de seta: animação de rotação + cor por estado
+  .trigger-icon {
+    transition:
+      transform 200ms ease,
+      color 200ms ease;
+    user-select: none;
+
+    &.rotated {
+      transform: rotate(180deg);
+    }
+
+    // Estado padrão: herda a cor do mat-form-field (cinza do Material)
+    &[data-state="default"] {
+      color: rgba(0, 0, 0, 0.54);
+    }
+
+    // Aberto: usa a cor primária do tema
+    &[data-state="open"] {
+      color: var(--mdc-theme-primary, #1976d2);
+    }
+
+    // Erro: usa a cor de erro do tema
+    &[data-state="error"] {
+      color: var(--mdc-theme-error, #f44336);
+    }
+
+    // Desabilitado: mais apagado
+    &[data-state="disabled"] {
+      color: rgba(0, 0, 0, 0.26);
+    }
   }
 }
+
+// ─── Overlay container ────────────────────────────────────────────────────────
 
 .overlay-container {
   display: flex;
   flex-direction: column;
   background-color: white;
-
   border-radius: 4px;
   box-shadow:
-    0 1px 1px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.2),
     0 4px 5px 0 rgba(0, 0, 0, 0.14),
-    0 1px 5px 0 rgba(0, 0, 0, 0.12);
+    0 1px 10px 0 rgba(0, 0, 0, 0.12);
+  overflow: hidden;
 }
+
+// ─── Barra de busca ───────────────────────────────────────────────────────────
+
+.search-form-field {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  min-height: 50px;
+
+  .select-all-checkbox {
+    margin-left: 12px;
+    flex-shrink: 0;
+  }
+
+  .search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    line-height: 50px;
+    padding-inline: 12px;
+    background: transparent;
+    color: rgba(0, 0, 0, 0.87);
+
+    &::placeholder {
+      color: rgba(0, 0, 0, 0.42);
+    }
+
+    &::-webkit-search-cancel-button {
+      display: none;
+    }
+  }
+
+  .clear-button {
+    flex-shrink: 0;
+    margin-right: 4px;
+  }
+}
+
+// ─── Viewport e itens ─────────────────────────────────────────────────────────
 
 .example-viewport {
   width: 100%;
-  max-height: 200px;
+  max-height: 250px;
   min-height: 50px;
 
   .cdk-virtual-scroll-content-wrapper {
@@ -39,20 +117,41 @@
   }
 }
 
-.search-form-field {
+.example-item {
+  height: 50px;
   display: flex;
   align-items: center;
-  width: 100%;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  gap: 8px;
+  padding: 0 12px;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 100ms ease;
 
-  input {
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+
+  &:focus-visible {
+    background-color: rgba(0, 0, 0, 0.08);
+    outline: 2px solid rgba(0, 0, 0, 0.3);
+    outline-offset: -2px;
+  }
+
+  &--selected {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+
+  .label {
     flex: 1;
-    line-height: 50px;
-    padding-inline: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 14px;
   }
 }
 
-.input-select .mat-input-element {
-  caret-color: transparent !important;
-  text-overflow: ellipsis;
+.no-results {
+  margin: 12px;
+  color: rgba(0, 0, 0, 0.54);
+  font-size: 14px;
 }

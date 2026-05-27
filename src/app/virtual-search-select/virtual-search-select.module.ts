@@ -14,16 +14,16 @@ import { VirtualSearchSelectComponent } from "./virtual-search-select.component"
 @NgModule({
   declarations: [VirtualSearchSelectComponent],
   imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    OverlayModule,
+    ScrollingModule,
     MatButtonModule,
     MatCheckboxModule,
     MatIconModule,
     MatInputModule,
     MatRippleModule,
-    OverlayModule,
-    ScrollingModule,
-    FormsModule,
-    ReactiveFormsModule,
-    CommonModule,
   ],
   exports: [VirtualSearchSelectComponent],
 })
