@@ -20,7 +20,7 @@
     <mat-icon matSuffix> arrow_drop_down </mat-icon>
 
     <mat-hint align="end" *ngIf="exibirQuantidade"
-      >{{ selected.size }} / {{ items.length }}</mat-hint
+      >{{ selected.size | number }} / {{ items.length | number }}</mat-hint
     >
   </mat-form-field>
 </div>

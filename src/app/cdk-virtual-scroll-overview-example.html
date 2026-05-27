@@ -1,28 +1,15 @@
-<div [formGroup]="form">
+<div class="acoes">
+  <button type="button" (click)="setarValorNoForm()">
+    Alterar valor no control pelo TS
+  </button>
+  <button type="button" (click)="printForm()">print form</button>
+</div>
+
+<form [formGroup]="form">
   <virtual-search-select
     titulo="Teste"
-    [iniciarTodosMarcados]="false"
+    [iniciarTodosMarcados]="true"
     [exibirQuantidade]="true"
     formControlName="teste"
   ></virtual-search-select>
-
-  <span style="display: block"
-    >Valor no form: {{form.get('teste')?.value}}</span
-  >
-
-  <button type="button" (click)="setarValorNoForm()">teste form</button>
-  <button type="button" (click)="printForm()">print</button>
-</div>
-
-<div [formGroup]="form">
-  <virtual-search-select
-    titulo="Teste"
-    [iniciarTodosMarcados]="false"
-    [exibirQuantidade]="true"
-    formControlName="teste2"
-  ></virtual-search-select>
-
-  <span style="display: block"
-    >Valor no form: {{form.get('teste2')?.value}}</span
-  >
-</div>
+</form>

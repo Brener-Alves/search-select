@@ -9,8 +9,8 @@ import {
   Optional,
   ViewChild,
   ViewEncapsulation,
-} from '@angular/core';
-import { ControlValueAccessor, NgControl } from '@angular/forms';
+} from "@angular/core";
+import { ControlValueAccessor, NgControl } from "@angular/forms";
 
 @Component({
   selector: "virtual-search-select",
@@ -24,7 +24,7 @@ export class VirtualSearchSelectComponent
 {
   @ViewChild("searchInput") searchInput!: ElementRef<HTMLInputElement>;
 
-  @Input() titulo: string;
+  @Input() titulo: string = "Selecione";
   @Input() iniciarTodosMarcados: boolean = true;
   @Input() exibirQuantidade: boolean = true;
 
@@ -47,7 +47,7 @@ export class VirtualSearchSelectComponent
 
   constructor(
     @Optional() public ngControl: NgControl,
-    private changeDetector: ChangeDetectorRef
+    private changeDetector: ChangeDetectorRef,
   ) {
     if (this.ngControl) {
       this.ngControl.valueAccessor = this;
@@ -69,7 +69,7 @@ export class VirtualSearchSelectComponent
       this.filteredList = this.items.slice();
     } else {
       this.filteredList = this.items.filter((item) =>
-        item.name.includes(this.filterValue)
+        item.name.includes(this.filterValue),
       );
     }
 

@@ -1,5 +1,9 @@
-import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ViewEncapsulation,
+} from "@angular/core";
+import { FormBuilder, Validators } from "@angular/forms";
 
 /** @title Basic virtual scroll */
 @Component({
@@ -11,8 +15,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 })
 export class CdkVirtualScrollOverviewExample {
   form = this.fb.group({
-    teste: [[], [Validators.required]],
-    teste2: [[10, 20], [Validators.required]],
+    teste: [null, [Validators.required]],
   });
 
   testeModel = [1, 7, 990];
