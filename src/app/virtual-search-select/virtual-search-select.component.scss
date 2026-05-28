@@ -1,3 +1,32 @@
+@import "~@angular/material/theming";
+
+::ng-deep .vss-overlay-panel {
+  // ─── Overlay container ────────────────────────────────────────────────────────
+  & {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow:
+      0 2px 4px -1px rgba(0, 0, 0, 0.2),
+      0 4px 5px 0 rgba(0, 0, 0, 0.14),
+      0 1px 10px 0 rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
 // ─── Trigger / campo de exibição ──────────────────────────────────────────────
 
 .input-select {
@@ -11,63 +40,15 @@
     pointer-events: none;
   }
 
-  // Impede que o cursor de texto apareça no input readonly
   .mat-mdc-input-element {
     caret-color: transparent !important;
     cursor: pointer !important;
     text-overflow: ellipsis;
     user-select: none;
   }
-
-  // Ícone de seta: animação de rotação + cor por estado
-  .trigger-icon {
-    transition:
-      transform 200ms ease,
-      color 200ms ease;
-    user-select: none;
-
-    &.rotated {
-      transform: rotate(180deg);
-    }
-
-    // Estado padrão: herda a cor do mat-form-field (cinza do Material)
-    &[data-state="default"] {
-      color: rgba(0, 0, 0, 0.54);
-    }
-
-    // Aberto: usa a cor primária do tema
-    &[data-state="open"] {
-      color: var(--mdc-theme-primary, #1976d2);
-    }
-
-    // Erro: usa a cor de erro do tema
-    &[data-state="error"] {
-      color: var(--mdc-theme-error, #f44336);
-    }
-
-    // Desabilitado: mais apagado
-    &[data-state="disabled"] {
-      color: rgba(0, 0, 0, 0.26);
-    }
-  }
-}
-
-// ─── Overlay container ────────────────────────────────────────────────────────
-
-.overlay-container {
-  display: flex;
-  flex-direction: column;
-  background-color: white;
-  border-radius: 4px;
-  box-shadow:
-    0 2px 4px -1px rgba(0, 0, 0, 0.2),
-    0 4px 5px 0 rgba(0, 0, 0, 0.14),
-    0 1px 10px 0 rgba(0, 0, 0, 0.12);
-  overflow: hidden;
 }
 
 // ─── Barra de busca ───────────────────────────────────────────────────────────
-
 .search-form-field {
   display: flex;
   align-items: center;
@@ -90,6 +71,10 @@
     background: transparent;
     color: rgba(0, 0, 0, 0.87);
 
+    &--no-checkbox {
+      padding-left: 16px;
+    }
+
     &::placeholder {
       color: rgba(0, 0, 0, 0.42);
     }
@@ -106,8 +91,7 @@
 }
 
 // ─── Viewport e itens ─────────────────────────────────────────────────────────
-
-.example-viewport {
+.viewport {
   width: 100%;
   max-height: 250px;
   min-height: 50px;
@@ -117,7 +101,7 @@
   }
 }
 
-.example-item {
+.item {
   height: 50px;
   display: flex;
   align-items: center;
@@ -133,12 +117,14 @@
 
   &:focus-visible {
     background-color: rgba(0, 0, 0, 0.08);
-    outline: 2px solid rgba(0, 0, 0, 0.3);
-    outline-offset: -2px;
   }
 
   &--selected {
     background-color: rgba(0, 0, 0, 0.04);
+  }
+
+  &--single {
+    padding: 0 16px;
   }
 
   .label {
@@ -147,6 +133,13 @@
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: 14px;
+  }
+
+  .single-check-icon {
+    flex-shrink: 0;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
   }
 }
 

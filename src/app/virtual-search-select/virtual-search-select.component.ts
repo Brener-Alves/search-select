@@ -11,57 +11,44 @@ import {
   Optional,
   Self,
   ViewChild,
-  ViewEncapsulation,
 } from "@angular/core";
 import { ControlValueAccessor, FormControl, NgControl } from "@angular/forms";
 import { Subscription } from "rxjs";
 
-export interface SelectItem {
-  id: number | string;
-  name: string;
-}
+export type SelectItem = Record<string, any>;
 
 @Component({
   selector: "virtual-search-select",
   styleUrls: ["virtual-search-select.component.scss"],
   templateUrl: "virtual-search-select.component.html",
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
 })
 export class VirtualSearchSelectComponent
   implements OnInit, AfterViewInit, DoCheck, OnDestroy, ControlValueAccessor
 {
   @ViewChild("searchInput") searchInput!: ElementRef<HTMLInputElement>;
 
-  @Input() lista: SelectItem[] = [];
   @Input() titulo: string = "Selecione";
+  @Input() valueKey: string = "chave";
+  @Input() labelKey: string = "valor";
+  @Input() lista: SelectItem[] = [];
+
   @Input() iniciarTodosMarcados: boolean = true;
-  @Input() exibirQuantidade: boolean = true;
   @Input() ordenar: boolean = true;
+  @Input() multiple: boolean = false;
 
   filteredList: SelectItem[] = [];
   filterValue = "";
-  selected = new Set<number | string>();
+
+  selected = new Set<any>();
   completed = false;
   indeterminated = false;
   exibirOverlayOpcoes = false;
+  isFocused = false;
 
-  /**
-   * FormControl interno vinculado ao matInput.
-   *
-   * Responsabilidades:
-   *  1. Carregar o texto de exibição (selectedLabel) como valor,
-   *     para que o mat-form-field flutue o label corretamente.
-   *  2. Espelhar erros e touched/dirty do NgControl externo,
-   *     para que mat-form-field pinte a borda vermelha e exiba mat-error
-   *     sem nenhum CSS forçado.
-   */
   readonly displayControl = new FormControl("");
 
-  // Rastreia o último touched visto do control externo para detectar
-  // mudanças causadas por markAllAsTouched() — que não dispara statusChanges.
   private _wasExternalTouched = false;
-
   private _statusSub = Subscription.EMPTY;
 
   constructor(
@@ -77,14 +64,17 @@ export class VirtualSearchSelectComponent
 
   ngOnInit(): void {
     if (this.ordenar) {
-      this.lista.sort((a, b) =>
-        Intl.Collator("pt-BR", { sensitivity: "base" }).compare(a.name, b.name),
+      this.lista = [...this.lista].sort((a, b) =>
+        Intl.Collator("pt-BR", { sensitivity: "base" }).compare(
+          String(a[this.labelKey] ?? ""),
+          String(b[this.labelKey] ?? ""),
+        ),
       );
     }
 
     this.applyFilter();
 
-    if (this.iniciarTodosMarcados) {
+    if (this.multiple && this.iniciarTodosMarcados) {
       this._selectAll();
     }
   }
@@ -93,9 +83,6 @@ export class VirtualSearchSelectComponent
     if (this.ngControl?.control) {
       this._syncDisplayControl();
 
-      // statusChanges cobre: validators, setErrors(), disable()/enable(),
-      // e também markAllAsTouched no Angular 18+ via unified events.
-      // Para versões anteriores, ngDoCheck cobre o touched.
       this._statusSub = this.ngControl.control.statusChanges.subscribe(() => {
         this._syncDisplayControl();
       });
@@ -104,12 +91,6 @@ export class VirtualSearchSelectComponent
     this.changeDetector.detectChanges();
   }
 
-  /**
-   * ngDoCheck roda em todo ciclo de detecção de mudanças do componente pai.
-   * É o único hook confiável para detectar markAsTouched/markAllAsTouched
-   * em todas as versões do Angular, já que esses métodos não emitem em
-   * statusChanges (apenas mudam a propriedade `touched`).
-   */
   ngDoCheck(): void {
     const externalTouched = !!this.ngControl?.control?.touched;
     if (externalTouched !== this._wasExternalTouched) {
@@ -125,37 +106,24 @@ export class VirtualSearchSelectComponent
 
   // ─── Sincronização do displayControl ────────────────────────────────────────
 
-  /**
-   * Sincroniza valor, erros e touched/dirty do control externo → displayControl.
-   *
-   * - setValue: faz o mat-label flutuar quando há texto selecionado
-   * - setErrors: ativa a borda vermelha e exibe o mat-error nativamente
-   * - markAsTouched/Dirty: satisfaz o ErrorStateMatcher padrão do Material
-   *   (que só mostra erro quando touched OU dirty)
-   */
   private _syncDisplayControl(): void {
     if (!this.ngControl?.control) return;
 
     const external = this.ngControl.control;
 
-    // Valor: usa selectedLabel para que o mat-label flutue corretamente
     this.displayControl.setValue(this.selectedLabel, { emitEvent: false });
-
-    // Erros: espelha exatamente os erros do control externo
     this.displayControl.setErrors(external.errors);
 
-    // touched
     external.touched
       ? this.displayControl.markAsTouched()
       : this.displayControl.markAsUntouched();
 
-    // dirty
     external.dirty
       ? this.displayControl.markAsDirty()
       : this.displayControl.markAsPristine();
   }
 
-  // ─── Getters para o template ────────────────────────────────────────────────
+  // ─── Getters ────────────────────────────────────────────────────────────────
 
   get viewportHeight(): number {
     return Math.min(Math.max(this.filteredList.length * 50, 50), 250);
@@ -163,26 +131,25 @@ export class VirtualSearchSelectComponent
 
   get selectedLabel(): string {
     if (this.selected.size === 0) return "";
+
+    if (!this.multiple) {
+      const item = this.lista.find(
+        (i) => i[this.valueKey] === Array.from(this.selected)[0],
+      );
+      return item ? String(item[this.labelKey] ?? "") : "";
+    }
+
     if (this.selected.size === this.lista.length) return "Todos";
 
     const MAX_DISPLAY = 3;
     const names = this.lista
-      .filter((item) => this.selected.has(item.id))
+      .filter((item) => this.selected.has(item[this.valueKey]))
       .slice(0, MAX_DISPLAY)
-      .map((item) => item.name);
+      .map((item) => String(item[this.labelKey] ?? ""));
 
     return this.selected.size > MAX_DISPLAY
       ? `${names.join(", ")} +${this.selected.size - MAX_DISPLAY}`
       : names.join(", ");
-  }
-
-  /** Estado do ícone: 'error' | 'disabled' | 'open' | 'default' */
-  get iconState(): "error" | "disabled" | "open" | "default" {
-    if (this.isDisabled) return "disabled";
-    if (this.displayControl.invalid && this.displayControl.touched)
-      return "error";
-    if (this.exibirOverlayOpcoes) return "open";
-    return "default";
   }
 
   get errorMessage(): string {
@@ -194,16 +161,18 @@ export class VirtualSearchSelectComponent
 
   // ─── TrackBy ────────────────────────────────────────────────────────────────
 
-  trackById(_index: number, item: SelectItem): number | string {
-    return item.id;
-  }
-
-  // ─── Filtro e seleção ───────────────────────────────────────────────────────
+  trackByValue = (_index: number, item?: SelectItem): any =>
+    item?.[this.valueKey];
+  // ─── Filtro ─────────────────────────────────────────────────────────────────
 
   applyFilter(): void {
     const term = this.filterValue.trim().toLowerCase();
     this.filteredList = term
-      ? this.lista.filter((item) => item.name.toLowerCase().includes(term))
+      ? this.lista.filter((item) =>
+          String(item[this.labelKey] ?? "")
+            .toLowerCase()
+            .includes(term),
+        )
       : this.lista.slice();
 
     this.updateStatusCheckAll();
@@ -215,21 +184,42 @@ export class VirtualSearchSelectComponent
     this.applyFilter();
   }
 
-  changeSelected(id: number | string): void {
-    this.selected.has(id) ? this.selected.delete(id) : this.selected.add(id);
+  // ─── Seleção ────────────────────────────────────────────────────────────────
+
+  changeSelected(value: any): void {
+    if (!this.multiple) {
+      // Seleção única: toggle — se já está marcado, desmarca; senão seleciona
+      if (this.selected.has(value)) {
+        this.selected.clear();
+      } else {
+        this.selected.clear();
+        this.selected.add(value);
+      }
+      this._emitChange();
+      this.updateStatusCheckAll();
+      // Fecha o overlay após selecionar na seleção única
+      this.fecharOverlay();
+      return;
+    }
+
+    this.selected.has(value)
+      ? this.selected.delete(value)
+      : this.selected.add(value);
     this._emitChange();
     this.updateStatusCheckAll();
   }
 
   changeAll(): void {
+    if (!this.multiple) return; // "selecionar todos" não se aplica à seleção única
+
     const allCurrentlySelected = this.filteredList.every((item) =>
-      this.selected.has(item.id),
+      this.selected.has(item[this.valueKey]),
     );
 
     this.filteredList.forEach((item) =>
       allCurrentlySelected
-        ? this.selected.delete(item.id)
-        : this.selected.add(item.id),
+        ? this.selected.delete(item[this.valueKey])
+        : this.selected.add(item[this.valueKey]),
     );
 
     this._emitChange();
@@ -239,7 +229,7 @@ export class VirtualSearchSelectComponent
   updateStatusCheckAll(): void {
     const count = this.filteredList.length;
     const selectedCount = this.filteredList.filter((item) =>
-      this.selected.has(item.id),
+      this.selected.has(item[this.valueKey]),
     ).length;
 
     this.completed = count > 0 && selectedCount === count;
@@ -277,14 +267,20 @@ export class VirtualSearchSelectComponent
   // ─── Helpers privados ───────────────────────────────────────────────────────
 
   private _selectAll(): void {
-    this.lista.forEach((item) => this.selected.add(item.id));
+    this.lista.forEach((item) => this.selected.add(item[this.valueKey]));
     this._emitChange();
     this.updateStatusCheckAll();
   }
 
   private _emitChange(): void {
-    this.onChange?.(Array.from(this.selected));
-    // Atualiza o displayControl com o novo label após cada mudança de seleção
+    if (this.multiple) {
+      // Múltipla: emite array com todos os valores selecionados
+      this.onChange?.(Array.from(this.selected));
+    } else {
+      // Única: emite o valor diretamente (não array), ou null se vazio
+      const values = Array.from(this.selected);
+      this.onChange?.(values.length > 0 ? values[0] : null);
+    }
     this._syncDisplayControl();
     this.changeDetector.markForCheck();
   }
@@ -292,17 +288,32 @@ export class VirtualSearchSelectComponent
   // ─── ControlValueAccessor ───────────────────────────────────────────────────
 
   onTouched?: () => void;
-  onChange?: (value: (number | string)[]) => void;
+  onChange?: (value: any) => void;
   isDisabled = false;
 
-  writeValue(obj: (number | string)[] | null): void {
-    this.selected = new Set(obj ?? []);
+  writeValue(obj: any): void {
+    if (this.multiple) {
+      // Múltipla: espera array
+      this.selected = new Set(
+        Array.isArray(obj) ? obj : obj != null ? [obj] : [],
+      );
+    } else {
+      // Única: espera valor escalar (ou array — pega o primeiro)
+      if (obj == null) {
+        this.selected = new Set();
+      } else if (Array.isArray(obj)) {
+        this.selected = obj.length > 0 ? new Set([obj[0]]) : new Set();
+      } else {
+        this.selected = new Set([obj]);
+      }
+    }
+
     this.updateStatusCheckAll();
     this._syncDisplayControl();
     this.changeDetector.markForCheck();
   }
 
-  registerOnChange(fn: (value: (number | string)[]) => void): void {
+  registerOnChange(fn: (value: any) => void): void {
     this.onChange = fn;
   }
 
@@ -313,6 +324,7 @@ export class VirtualSearchSelectComponent
   setDisabledState(isDisabled: boolean): void {
     this.isDisabled = isDisabled;
     isDisabled ? this.displayControl.disable() : this.displayControl.enable();
+    this._syncDisplayControl();
     this.changeDetector.markForCheck();
   }
 }

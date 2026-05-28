@@ -12,41 +12,44 @@
   [attr.aria-haspopup]="'listbox'"
   [attr.aria-disabled]="isDisabled"
   [attr.aria-label]="titulo"
+  (focus)="isFocused = true"
+  (blur)="isFocused = false"
 >
-  <mat-form-field [style.width.%]="100" appearance="outline">
+  <mat-form-field
+    [style.width.%]="100"
+    appearance="outline"
+    [class.mat-focused]="exibirOverlayOpcoes || isFocused"
+  >
     <mat-label>{{ titulo }}</mat-label>
 
-    <!--
-      O displayControl não carrega valor real — serve apenas para que o
-      mat-form-field enxergue erros e estado touched/dirty nativamente.
-      Os erros são espelhados do NgControl externo em _syncDisplayControl().
-      - readonly: impede digitação
-      - tabindex="-1": foco fica no wrapper (role=combobox)
-    -->
     <input
+      class="sr-only"
       matInput
       type="text"
-      [value]="selectedLabel"
       [formControl]="displayControl"
       readonly
       tabindex="-1"
-      aria-hidden="true"
     />
 
-    <mat-icon
-      matSuffix
-      class="trigger-icon"
-      [class.rotated]="exibirOverlayOpcoes"
-      [attr.data-state]="iconState"
+    <div
+      class="mat-select"
+      [class.mat-select-disabled]="isDisabled"
+      [class.mat-select-invalid]="
+        displayControl.invalid &&
+        (displayControl.dirty || displayControl.touched)
+      "
     >
-      arrow_drop_down
-    </mat-icon>
+      <div class="mat-select-trigger" [style.height.px]="0">
+        <span class="mat-select-value">{{ displayControl.value }}</span>
 
-    <mat-hint align="end" *ngIf="exibirQuantidade">
+        <div class="mat-select-arrow" [style.margin-top.px]="-12"></div>
+      </div>
+    </div>
+
+    <mat-hint align="end" *ngIf="multiple">
       {{ selected.size | number }} / {{ lista.length | number }}
     </mat-hint>
 
-    <!-- Funciona nativamente agora que displayControl espelha os erros -->
     <mat-error>{{ errorMessage }}</mat-error>
   </mat-form-field>
 </div>
@@ -58,14 +61,15 @@
   [cdkConnectedOverlayWidth]="inputSelect.offsetWidth"
   [cdkConnectedOverlayHasBackdrop]="true"
   [cdkConnectedOverlayBackdropClass]="'overlay-transparent'"
-  [cdkConnectedOverlayPanelClass]="'overlay-container'"
+  [cdkConnectedOverlayPanelClass]="'vss-overlay-panel'"
   [cdkConnectedOverlayOffsetY]="-25"
   (backdropClick)="fecharOverlay()"
   (overlayKeydown)="onOverlayKeydown($event)"
 >
-  <!-- Barra de busca + select-all -->
+  <!-- Barra de busca + select-all (select-all apenas no modo múltiplo) -->
   <div class="search-form-field" role="search">
     <mat-checkbox
+      *ngIf="multiple"
       class="select-all-checkbox"
       (click)="$event.preventDefault(); changeAll()"
       (keydown.enter)="$event.preventDefault(); changeAll()"
@@ -80,6 +84,7 @@
       #searchInput
       type="search"
       class="search-input"
+      [class.search-input--no-checkbox]="!multiple"
       [(ngModel)]="filterValue"
       (input)="applyFilter()"
       placeholder="Pesquisar"
@@ -102,36 +107,69 @@
   <!-- Lista virtualizada -->
   <cdk-virtual-scroll-viewport
     itemSize="50"
-    class="example-viewport"
+    class="viewport"
     [style.height.px]="viewportHeight"
     role="listbox"
     [attr.aria-label]="titulo"
-    [attr.aria-multiselectable]="true"
+    [attr.aria-multiselectable]="multiple"
   >
-    <div
-      *cdkVirtualFor="let item of filteredList; trackBy: trackById"
-      class="example-item"
-      matRipple
-      [style.max-width.px]="inputSelect.offsetWidth"
-      [class.example-item--selected]="selected.has(item.id)"
-      (click)="changeSelected(item.id)"
-      (keydown.enter)="changeSelected(item.id)"
-      (keydown.space)="$event.preventDefault(); changeSelected(item.id)"
-      role="option"
-      [attr.aria-selected]="selected.has(item.id)"
-      tabindex="0"
-    >
-      <mat-checkbox
-        [checked]="selected.has(item.id)"
-        (click)="$event.preventDefault()"
-        (keydown.enter)="$event.preventDefault()"
-        (keydown.space)="$event.preventDefault()"
-        aria-hidden="true"
-        tabindex="-1"
-        color="primary"
-      ></mat-checkbox>
-      <span class="label">{{ item.name }}</span>
-    </div>
+    <!-- ── Modo MÚLTIPLO ── -->
+    <ng-container *ngIf="multiple; else singleMode">
+      <div
+        *cdkVirtualFor="let item of filteredList; trackBy: trackByValue"
+        class="item"
+        matRipple
+        [style.max-width.px]="inputSelect.offsetWidth"
+        [class.item--selected]="selected.has(item[valueKey])"
+        (click)="changeSelected(item[valueKey])"
+        (keydown.enter)="changeSelected(item[valueKey])"
+        (keydown.space)="
+          $event.preventDefault(); changeSelected(item[valueKey])
+        "
+        role="option"
+        [attr.aria-selected]="selected.has(item[valueKey])"
+        tabindex="0"
+      >
+        <mat-checkbox
+          [checked]="selected.has(item[valueKey])"
+          (click)="$event.preventDefault()"
+          (keydown.enter)="$event.preventDefault()"
+          (keydown.space)="$event.preventDefault()"
+          aria-hidden="true"
+          tabindex="-1"
+          color="primary"
+        ></mat-checkbox>
+        <span class="label">{{ item[labelKey] }}</span>
+      </div>
+    </ng-container>
+
+    <!-- ── Modo ÚNICO ── -->
+    <ng-template #singleMode>
+      <div
+        *cdkVirtualFor="let item of filteredList; trackBy: trackByValue"
+        class="item item--single"
+        matRipple
+        [style.max-width.px]="inputSelect.offsetWidth"
+        [class.item--selected]="selected.has(item[valueKey])"
+        (click)="changeSelected(item[valueKey])"
+        (keydown.enter)="changeSelected(item[valueKey])"
+        (keydown.space)="
+          $event.preventDefault(); changeSelected(item[valueKey])
+        "
+        role="option"
+        [attr.aria-selected]="selected.has(item[valueKey])"
+        tabindex="0"
+      >
+        <span class="label">{{ item[labelKey] }}</span>
+        <mat-icon
+          *ngIf="selected.has(item[valueKey])"
+          class="single-check-icon"
+          aria-hidden="true"
+          color="primary"
+          >check</mat-icon
+        >
+      </div>
+    </ng-template>
 
     <p
       *ngIf="!filteredList.length"

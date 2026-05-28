@@ -3,7 +3,7 @@ import {
   Component,
   ViewEncapsulation,
 } from "@angular/core";
-import { FormBuilder, FormControl, Validators } from "@angular/forms";
+import { FormBuilder, Validators } from "@angular/forms";
 
 import { SelectItem } from "./virtual-search-select/virtual-search-select.component";
 
@@ -15,7 +15,6 @@ import { SelectItem } from "./virtual-search-select/virtual-search-select.compon
   encapsulation: ViewEncapsulation.None,
 })
 export class CdkVirtualScrollOverviewExample {
-  toppings = new FormControl(null, Validators.required);
   toppingList: string[] = [
     "Extra cheese",
     "Mushroom",
@@ -26,17 +25,38 @@ export class CdkVirtualScrollOverviewExample {
   ];
 
   form = this.fb.group({
-    teste: [null, [Validators.required]],
+    testeMultiplo: [null, [Validators.required]],
+    testeUnico: [null, [Validators.required]],
+    toppings: [null, [Validators.required]],
   });
 
   lista: SelectItem[] = Array.from({ length: 100000 }).map((_, i) => ({
     id: i + 1,
-    name: `Item #${i + 1}`,
+    nome: `Item ${i + 1}`,
   }));
 
-  constructor(protected fb: FormBuilder) {}
+  constructor(protected fb: FormBuilder) {
+    this.form.markAllAsTouched();
+  }
 
   setarValor(): void {
-    this.form.get("teste")?.setValue([1, 2, 3]);
+    this.form.get("testeMultiplo")?.setValue([1, 2, 3]);
+    this.form.get("testeUnico")?.setValue(5);
+  }
+
+  reset(): void {
+    this.form.reset();
+  }
+
+  printForm(): void {
+    console.log(this.form);
+  }
+
+  disable(): void {
+    this.form.disable();
+  }
+
+  enable(): void {
+    this.form.enable();
   }
 }

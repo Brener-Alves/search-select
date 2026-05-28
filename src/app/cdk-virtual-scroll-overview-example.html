@@ -1,38 +1,45 @@
 <div class="acoes">
   <button type="button" (click)="setarValor()">Alterar valor</button>
+  <button type="button" (click)="reset()">Reset</button>
+  <button type="button" (click)="printForm()">Imprimir form</button>
+  <button type="button" (click)="disable()">Desabilitar form</button>
+  <button type="button" (click)="enable()">Habilitar form</button>
 </div>
 
 <form [formGroup]="form" class="container-form">
   <virtual-search-select
-    titulo="Teste"
+    titulo="Múltiplo"
+    valueKey="id"
+    labelKey="nome"
     [lista]="lista"
-    [iniciarTodosMarcados]="true"
-    [exibirQuantidade]="true"
+    [multiple]="true"
     [ordenar]="false"
-    formControlName="teste"
+    [iniciarTodosMarcados]="false"
+    formControlName="testeMultiplo"
   ></virtual-search-select>
 
   <mat-form-field appearance="outline">
-    <mat-label>Toppings</mat-label>
-    <mat-select [formControl]="toppings" multiple>
-      <mat-select-trigger>
-        {{toppings.value ? toppings.value[0] : ''}}
-        <span
-          *ngIf="toppings.value?.length > 1"
-          class="example-additional-selection"
-        >
-          (+{{toppings.value.length - 1}} {{toppings.value?.length === 2 ?
-          'other' : 'others'}})
-        </span>
-      </mat-select-trigger>
+    <mat-label>Original</mat-label>
+    <mat-select formControlName="toppings" multiple>
       <mat-option *ngFor="let topping of toppingList" [value]="topping"
         >{{topping}}</mat-option
       >
     </mat-select>
-
     <mat-error>Campo obrigatório</mat-error>
   </mat-form-field>
+
+  <virtual-search-select
+    titulo="Seleção única"
+    valueKey="id"
+    labelKey="nome"
+    [lista]="lista"
+    [ordenar]="false"
+    [multiple]="false"
+    formControlName="testeUnico"
+  ></virtual-search-select>
 </form>
 
-<p>Errors control: {{ this.form.get("teste")?.errors | json }}</p>
-<p>Status form: {{ this.form.status }}</p>
+<p>Multiple value: {{ form.get("testeMultiplo")?.value | json }}</p>
+<p>Single value: {{ form.get("testeUnico")?.value | json }}</p>
+
+<p>Status form: {{ form.status }}</p>
